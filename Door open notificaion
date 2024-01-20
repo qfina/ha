@@ -1,7 +1,6 @@
-alias: Door Opened Alexa Announcement on FireTV
+alias: Door Opened Alexa Announcement on Bedroom
 description: >-
-  Alexa announces on FireTV when a door is opened at maximum volume (30-minute
-  cooldown for front door)
+  Alexa announces in bedroom when a door is opened at 20% volume (07:30-23:00, 30-minute cooldown for front door)
 trigger:
   - type: opened
     platform: device
@@ -15,27 +14,28 @@ trigger:
     domain: binary_sensor
 condition:
   - condition: template
-    value_template: |-
+    value_template: >-
       {{ trigger.entity_id != 'binary_sensor.front_door_contact' or
          (trigger.entity_id == 'binary_sensor.front_door_contact' and
          states('input_boolean.door_open_cooldown') == 'off') }}
+  - condition: time
+    after: "07:30:00"
+    before: "23:00:00"
 action:
   - service: media_player.volume_set
     target:
-      entity_id: media_player.fire_tv_cube
+      entity_id: media_player.bedroom_sonos
     data:
-      volume_level: 1
+      volume_level: 0.2
   - service: notify.alexa_media
     data:
       target:
-        - media_player.fire_tv_cube
+        - media_player.bedroom_sonos
       message: |
         {% if trigger.entity_id == 'binary_sensor.front_door_contact' %}
           Front Door opened.
         {% elif trigger.entity_id == 'binary_sensor.garage_door_contact' %}
           Garage Door opening.
-        {% else %}
-          An unrecognised door opened, or, this is a test.
         {% endif %}
       data:
         type: tts
