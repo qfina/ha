@@ -1,0 +1,56 @@
+alias: Door Opened Alexa Announcement on FireTV
+description: >-
+  Alexa announces on FireTV when a door is opened at maximum volume (30-minute
+  cooldown for front door)
+trigger:
+  - type: opened
+    platform: device
+    device_id: 4f3e900231166c773156a3dc946fd44f
+    entity_id: binary_sensor.front_door_contact
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: 28f3423ecec8312e0ed2e8fbd5c5c0b5
+    entity_id: binary_sensor.garage_door_contact
+    domain: binary_sensor
+condition:
+  - condition: template
+    value_template: |-
+      {{ trigger.entity_id != 'binary_sensor.front_door_contact' or
+         (trigger.entity_id == 'binary_sensor.front_door_contact' and
+         states('input_boolean.door_open_cooldown') == 'off') }}
+action:
+  - service: media_player.volume_set
+    target:
+      entity_id: media_player.fire_tv_cube
+    data:
+      volume_level: 1
+  - service: notify.alexa_media
+    data:
+      target:
+        - media_player.fire_tv_cube
+      message: |
+        {% if trigger.entity_id == 'binary_sensor.front_door_contact' %}
+          Front Door opened.
+        {% elif trigger.entity_id == 'binary_sensor.garage_door_contact' %}
+          Garage Door opening.
+        {% else %}
+          An unrecognised door opened, or, this is a test.
+        {% endif %}
+      data:
+        type: tts
+  - condition: template
+    value_template: "{{ trigger.entity_id == 'binary_sensor.front_door_contact' }}"
+  - delay:
+      seconds: 10
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.door_open_cooldown
+    data: {}
+  - delay:
+      minutes: 30
+  - service: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.door_open_cooldown
+    data: {}
+mode: single
