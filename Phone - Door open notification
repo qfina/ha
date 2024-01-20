@@ -1,0 +1,33 @@
+# Sends a notification to my phone I am not home, and a door is opened
+
+alias: Door Opened Phone Notification
+description: Notify phone when a door is opened
+trigger:
+  - type: opened
+    platform: device
+    device_id: 4f3e900231166c773156a3dc946fd44f
+    entity_id: binary_sensor.front_door_contact
+    domain: binary_sensor
+  - type: opened
+    platform: device
+    device_id: 28f3423ecec8312e0ed2e8fbd5c5c0b5
+    entity_id: binary_sensor.garage_door_contact
+    domain: binary_sensor
+condition:
+  - condition: not
+    conditions:
+      - condition: zone
+        entity_id: device_tracker.phone
+        zone: zone.home
+action:
+  - service: notify.mobile_app_phone
+    data:
+      message: |
+        {% if trigger.entity_id == 'binary_sensor.front_door_contact' %}
+          Front Door opened
+        {% elif trigger.entity_id == 'binary_sensor.garage_door_contact' %}
+          Garage Door opened
+        {% else %}
+          Door opened
+        {% endif %}
+mode: single
