@@ -1,4 +1,6 @@
 # Sends a notification to my phone I am not home, and a door is opened
+# Ensure you have set your Home area on the map in HA
+# You will need the HA app on your phone, with your phone added as a device to HA
 
 alias: Door Opened Phone Notification
 description: Notify phone when a door is opened
