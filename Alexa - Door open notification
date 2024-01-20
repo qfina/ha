@@ -1,61 +1,45 @@
 # Automation that announces on a specified Alexa device (requires Alexa Media Player) that a door has been opened
 # Announcements only happen between the hours of 07:30 - 23:00
-# Front door has a 30 minute cool-off, meaning it won't announce again within that time (requires a 'Toggle' Helper)
-# Additionally, before announcing, the volume is set to 20% on the Alexa device
+# The announcement will only run once every 30 minutes (requires a 'Toggle' Helper)
+# Before announcing, the volume is set to 20% on the Alexa device
 
-alias: Door Opened Alexa Announcement
+alias: Front Door Opened Alexa Announcement
 description: >-
-  Alexa announces when a door is opened at 20% volume (07:30-23:00, 30-minute cooldown for front door)
+  Alexa announces when the front door is opened at 20% volume (07:30-23:00, 30-minute cooldown)
 trigger:
   - type: opened
     platform: device
     device_id: 4f3e900231166c773156a3dc946fd44f
     entity_id: binary_sensor.front_door_contact
     domain: binary_sensor
-  - type: opened
-    platform: device
-    device_id: 28f3423ecec8312e0ed2e8fbd5c5c0b5
-    entity_id: binary_sensor.garage_door_contact
-    domain: binary_sensor
 condition:
-  - condition: template
-    value_template: >-
-      {{ trigger.entity_id != 'binary_sensor.front_door_contact' or
-         (trigger.entity_id == 'binary_sensor.front_door_contact' and
-         states('input_boolean.door_open_cooldown') == 'off') }}
+  - condition: state
+    entity_id: input_boolean.front_door_cooldown
+    state: "off"
   - condition: time
     after: "07:30:00"
     before: "23:00:00"
 action:
   - service: media_player.volume_set
     target:
-      entity_id: media_player.bedroom_alexa
+      entity_id: media_player.alexa_device
     data:
       volume_level: 0.2
   - service: notify.alexa_media
     data:
       target:
-        - media_player.bedroom_alexa
-      message: |
-        {% if trigger.entity_id == 'binary_sensor.front_door_contact' %}
-          Front Door opened.
-        {% elif trigger.entity_id == 'binary_sensor.garage_door_contact' %}
-          Garage Door opening.
-        {% endif %}
+        - media_player.alexa_device
+      message: Front Door opened.
       data:
         type: tts
-  - condition: template
-    value_template: "{{ trigger.entity_id == 'binary_sensor.front_door_contact' }}"
-  - delay:
-      seconds: 10
   - service: input_boolean.turn_on
     target:
-      entity_id: input_boolean.door_open_cooldown
+      entity_id: input_boolean.front_door_cooldown
     data: {}
   - delay:
       minutes: 30
   - service: input_boolean.turn_off
     target:
-      entity_id: input_boolean.door_open_cooldown
+      entity_id: input_boolean.front_door_cooldown
     data: {}
 mode: single
