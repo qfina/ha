@@ -1,6 +1,6 @@
 # Automation that announces on a specified Alexa device (requires Alexa Media Player) that a door has been opened.
 # Announcements only happen between the hours of 07:30 - 23:00
-# One of the doors has a 30 minute cool-off, meaning it won't announce again within that time.
+# Front door has a 30 minute cool-off, meaning it won't announce again within that time.
 # Additionally, before announcing, the volume is set to 20% on the Alexa device.
 
 alias: Door Opened Alexa Announcement
