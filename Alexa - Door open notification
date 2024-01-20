@@ -29,13 +29,13 @@ condition:
 action:
   - service: media_player.volume_set
     target:
-      entity_id: media_player.bedroom_sonos
+      entity_id: media_player.bedroom_alexa
     data:
       volume_level: 0.2
   - service: notify.alexa_media
     data:
       target:
-        - media_player.bedroom_sonos
+        - media_player.bedroom_alexa
       message: |
         {% if trigger.entity_id == 'binary_sensor.front_door_contact' %}
           Front Door opened.
